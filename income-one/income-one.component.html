@@ -1,0 +1,50 @@
+<section class="container breadcrumbs" role="region">
+  <nav aria-label="Breadcrumbs" role='navigation'>
+    <a routerLink="/dashboard">{{'breadcrumbs.paths.dashboard.fragment' | translate }}</a>
+    <span aria-hidden="true">{{'breadcrumbs.separator' | translate }}</span>
+    <a routerLink="/reports">{{'breadcrumbs.paths.reports.fragment' | translate }}</a>
+    <span aria-hidden="true">{{'breadcrumbs.separator' | translate }}</span>
+    <a routerLink="/reports/income">{{'breadcrumbs.paths.reports.income.fragment' | translate }}</a>
+    <span aria-hidden="true">{{'breadcrumbs.separator' | translate }}</span>
+    <a routerLink="/reports/income/one">{{'breadcrumbs.paths.reports.income.one.fragment' | translate }}</a>
+  </nav>
+
+  <h1 class='title1'>{{'reports.income.one.title' | translate }}</h1>
+  <hr class='thick'>
+  <div *ngIf='loading' fxLayout='row' fxLayoutAlign='center center' class='loads'>
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <div *ngIf='thereWasAnError'>
+    <alert [id]="errorCode"></alert>>
+  </div>
+
+  <div *ngIf='!loading' fxLayout='row wrap' fxLayout.lt-sm='column wrap' class='template-content-loads flexwrapper'>
+    <div fxFlex='0 0 75%' class='flexblock'>
+      <dl>
+        <dt>{{'types.columns.status' | translate }}</dt>
+        <dd>{{payload.status | translate}}</dd>
+        <dt *ngIf="payload.status === 'types.reports.statuses.EDS2002'">{{'types.columns.reason' | translate }}</dt>
+        <dd *ngIf="payload.status === 'types.reports.statuses.EDS2002'">{{payload.reason | translate }}</dd>
+        <dt>{{'types.columns.member' | translate }}</dt>
+        <dd>{{payload.memberName}}</dd>
+        <dt>{{'types.columns.employer' | translate }}</dt>
+        <dd>{{payload.employerName}}</dd>
+        <dt>{{'types.columns.pay.date' | translate }} </dt>
+        <dd>{{toLocalizedDate(language, payload.date)}}</dd>
+        <dt>{{'types.columns.pay.gross' | translate }}</dt>
+        <dd>{{payload.grossAmount | currency:'CAD':'symbol-narrow':'':language }}</dd>
+        <dt>{{'types.columns.pay.net' | translate }}</dt>
+        <dd>{{payload.netAmount | currency:'CAD':'symbol-narrow':'':language }}</dd>
+        <dt>{{'types.columns.childsupport' | translate }}</dt>
+        <dd>{{payload.childSupportAmount | currency:'CAD':'symbol-narrow':'':language }}</dd>
+        <dt>{{'types.columns.garnish' | translate }}</dt>
+        <dd>{{payload.garnishmentAmount | currency:'CAD':'symbol-narrow':'':language }}</dd>
+        <dt>{{'types.columns.submitted' | translate }}</dt>
+        <dd>{{toLocalizedDate(language, payload.submittedTimeStamp)}}</dd>
+        <dt *ngIf="payload.documents ? payload.documents[0] : false">{{'types.columns.fileName' | translate }}</dt>
+        <dd *ngIf="payload.documents ? payload.documents[0] : false">{{payload.documents[0]}}</dd>
+      </dl>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,20 @@
+<div mat-dialog-title>
+  <div>
+    <button (click)="onCloseClick()" class="buttonPlacement">
+        <i class="fa fa-window-close" aria-hidden="true" style="font-size: x-large;"></i>
+  </button>
+  </div>
+</div>
+<div mat-dialog-content>
+  <div *ngIf="data.type === 'pdf'">
+      <template-pdfview
+      [raw]='data.url'
+      text='some download text'
+      >
+      <p>some other text</p>
+    </template-pdfview>
+  </div>
+  <div *ngIf="data.type === 'image'">
+      <img [src]="data.url" />
+  </div>
+</div>

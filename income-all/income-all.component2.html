@@ -1,0 +1,125 @@
+<section class="container breadcrumbs" role="region">
+  <nav aria-label="Breadcrumbs" role="navigation">
+    <a routerLink="/dashboard">{{
+      'breadcrumbs.paths.dashboard.fragment' | translate
+    }}</a>
+    <span aria-hidden="true">{{ 'breadcrumbs.separator' | translate }}</span>
+    <a routerLink="/reports">{{
+      'breadcrumbs.paths.reports.fragment' | translate
+    }}</a>
+    <span aria-hidden="true">{{ 'breadcrumbs.separator' | translate }}</span>
+    <a routerLink="/reports/income">{{
+      'breadcrumbs.paths.reports.income.fragment' | translate
+    }}</a>
+    <span aria-hidden="true">{{ 'breadcrumbs.separator' | translate }}</span>
+    <a routerLink="/reports/income/complete">{{
+      'breadcrumbs.paths.reports.income.all.fragment' | translate
+    }}</a>
+  </nav>
+
+    <h1 class="title1">{{ 'reports.income.all.title' | translate }}</h1>
+    <hr class="thick" />
+    <h2 class="title2">{{ 'reports.income.all.subtitle' | translate }}</h2>
+    <p *ngIf="showReportIncomeButton" class="description">{{ 'reports.income.all.info' | translate }}</p>
+
+  <div *ngIf="!showReportIncomeButton">
+    <alert [id]="18500" [class]="'warning'"></alert>
+  </div>
+  <div *ngIf="thereWasAnError">
+    <div
+      class="error"
+      role="alert"
+      aria-atomic="true"
+      aria-relevant="additions removals"
+    >
+      {{ errorCode | translate }}
+    </div>
+  </div>
+  <div  *ngIf="showReportIncomeButton" class="mat-actions" class="mb15">
+    <button
+      mat-raised-button
+      id="btnReportIncome"
+      aria-lable="Report Income"
+      (click)="onReportIncome()"
+      color="primary"
+    >
+      {{ 'reports.income.all.submit' | translate }}
+  </button>
+  </div>
+
+  <h3 class="title3">{{ 'reports.income.all.history' | translate }}</h3>
+  <div *ngIf="tableIsEmpty">
+    <div
+      class="general"
+      role="alert"
+      aria-atomic="true"
+      aria-relevant="additions removals"
+    >
+      {{ 'reports.income.all.table.empty' | translate }}
+    </div>
+  </div>
+  <div fxLayout="row" *ngIf="loading" fxLayoutAlign="center center" class="spinner">
+    <mat-spinner ></mat-spinner>
+  </div>
+  <div [ngClass]="tableIsEmpty || loading ? 'hide' : 'show'">
+    <table
+      mat-table
+      [dataSource]="dataSource"
+      matSort
+      matSortActive="paydate"
+      matSortDirection="desc"
+      class=""
+      role="table"
+      [title]="'reports.income.all.history' | translate"
+    >
+      <ng-container matColumnDef="paydate">
+        <th role="columnheader" mat-header-cell *matHeaderCellDef mat-sort-header>
+          {{ 'types.columns.pay.date' | translate }}
+        </th>
+        <td mat-cell *matCellDef="let element">
+          {{ toLocalizedDate(element.paydate) }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th role="columnheader" mat-header-cell *matHeaderCellDef mat-sort-header>
+          {{ 'types.columns.status' | translate }}
+        </th>
+        <td  [ngClass]="{'redFont':element.status === 'Returned', 'greenFont': element.status === 'Accepted'}" mat-cell *matCellDef="let element">{{ element.status }}</td>
+      </ng-container>
+      <ng-container matColumnDef="amount">
+        <th role="columnheader" mat-header-cell *matHeaderCellDef mat-sort-header>
+          {{ 'types.columns.amount' | translate }}
+        </th>
+        <td role="cell" mat-cell *matCellDef="let element">
+          {{ element.netAmount | currency: 'CAD':'symbol-narrow':'':language }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="employer">
+        <th role="columnheader" mat-header-cell *matHeaderCellDef mat-sort-header>
+          {{ 'types.columns.employer' | translate }}
+        </th>
+        <td mat-cell role="cell" *matCellDef="let element">{{ element.employerName }}</td>
+      </ng-container>
+
+      <ng-container  matColumnDef="arrow">
+        <th role="columnheader" mat-header-cell *matHeaderCellDef>
+        </th>
+        <td mat-cell role="cell" *matCellDef="let element"><i class="fa fa-chevron-right right" [title]="'reports.income.all.table.click' | translate"></i></td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef= getDisplayedColumns();></tr>
+      <tr
+        mat-row
+        role="row"
+        *matRowDef="let row; columns: getDisplayedColumns();"
+        (click)="select(row)"
+        tabindex="0"
+        [title]="'reports.income.all.table.click' | translate"
+      ></tr>
+    </table>
+
+    <mat-paginator [pageSize]="'20'" showFirstLastButtons></mat-paginator>
+  </div>
+</section>

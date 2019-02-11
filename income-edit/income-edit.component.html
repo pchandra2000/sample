@@ -1,0 +1,706 @@
+<section class="container breadcrumbs" role="region">
+  <nav aria-label="Breadcrumbs" role="navigation">
+    <a routerLink="/dashboard">{{
+      'breadcrumbs.paths.dashboard.fragment' | translate
+    }}</a>
+    <span aria-hidden="true">{{ 'breadcrumbs.separator' | translate }}</span>
+    <a routerLink="/reports">{{
+      'breadcrumbs.paths.reports.fragment' | translate
+    }}</a>
+    <span aria-hidden="true">{{ 'breadcrumbs.separator' | translate }}</span>
+    <a routerLink="/reports/income">{{
+      'breadcrumbs.paths.reports.income.fragment' | translate
+    }}</a>
+    <span aria-hidden="true">{{ 'breadcrumbs.separator' | translate }}</span>
+    <a routerLink="/reports/income/edit">{{
+      'breadcrumbs.paths.reports.income.edit.fragment' | translate
+    }}</a>
+  </nav>
+
+  <h1 class="title1">{{ 'reports.income.edit.title' | translate }}</h1>
+  <hr class="thick" />
+  <p class="description">{{ 'reports.income.edit.description' | translate }}</p>
+
+  <div *ngIf="thereWasAnError">
+    <alert [id]="errorCode" [class]="'success'"></alert>
+  </div>
+
+  <form
+    novalidate
+    [formGroup]="incomeEditForm"
+    class=""
+    role="form"
+    (ngSubmit)="onSubmit()"
+  >
+    <div class="form-control-container">
+      <fieldset class="mat-form-controls">
+        <legend class="mat-form-label">
+          <span id="memberlabel">{{
+            'reports.income.edit.memberId.label' | translate
+          }}</span>
+        </legend>
+        <div
+          fxLayout="row wrap"
+          fxLayout.lt-sm="column wrap"
+          ngClass.lt-sm="small"
+        >
+          <mat-form-field fxFlex="0 0 50%">
+            <mat-select
+              id="memberSelect"
+              (selectionChange)="resetEmployers($event)"
+              formControlName="memberId"
+              role="listbox"
+              aria-labelledby="memberlabel"
+              aria-required="true"
+            >
+              <mat-option
+                *ngFor="let member of members"
+                [value]="member.memberId"
+                role="option"
+              >
+                {{ member.memberName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </fieldset>
+      <div role="alert" aria-atomic="true" aria-relevant="additions removals">
+        <mat-error
+          *ngIf="
+            (!incomeEditForm.get('memberId').valid &&
+              incomeEditForm.get('memberId').touched) ||
+            showErrors
+          "
+          [ngClass.lt-sm]="'small'"
+        >
+          <span *ngIf="incomeEditForm.get('memberId').hasError('required')">{{
+            'reports.income.edit.memberId.error.required' | translate
+          }}</span>
+        </mat-error>
+      </div>
+    </div>
+    <div class="form-control-container">
+      <fieldset class="mat-form-controls">
+        <legend class="mat-form-label">
+          <span id="employerlabel">{{
+            'reports.income.edit.employmentId.label' | translate
+          }}</span>
+          <button
+            role="button"
+            (click)="showTooltip('reports.income.edit.employmentId.tooltip')"
+            id="employerToolTipButton"
+            aria-label="tooltip"
+            class="mat-form-tooltip"
+            type="button"
+          >
+            &nbsp;<i class="fa font-size-40 fa-question-circle"></i>
+          </button>
+        </legend>
+        <div
+          fxLayout="row wrap"
+          fxLayout.lt-sm="column wrap"
+          ngClass.lt-sm="small"
+        >
+          <mat-form-field fxFlex="0 0 50%">
+            <mat-select
+              formControlName="employmentId"
+              id="employerSelect"
+              role="listbox"
+              aria-labelledby="employerlabel"
+              aria-required="true"
+            >
+              <mat-option
+                *ngFor="
+                  let employer of employers[incomeEditForm.value.memberId]
+                "
+                [value]="employer.employmentId"
+                role="option"
+              >
+                {{ employer.employerName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </fieldset>
+      <div role="alert" aria-atomic="true" aria-relevant="additions removals">
+        <mat-error
+          *ngIf="
+            (!incomeEditForm.get('employmentId').valid &&
+              incomeEditForm.get('employmentId').touched) ||
+            showErrors
+          "
+          [ngClass.lt-sm]="'small'"
+        >
+          <span
+            *ngIf="incomeEditForm.get('employmentId').hasError('required')"
+            >{{
+              'reports.income.edit.employmentId.error.required' | translate
+            }}</span
+          >
+        </mat-error>
+      </div>
+    </div>
+
+    <div class="form-control-container">
+      <fieldset class="mat-form-controls">
+        <legend class="mat-form-label">
+          <span id="paydateLabel">{{
+            'reports.income.edit.date.label' | translate
+          }}</span>
+          <button
+            role="button"
+            (click)="showTooltip('reports.income.edit.date.tooltip')"
+            id="paydateToolTipButton"
+            aria-label="tooltip"
+            class="mat-form-tooltip"
+            type="button"
+          >
+            &nbsp;<i class="fa font-size-40 fa-question-circle"></i>
+          </button>
+        </legend>
+        <div
+          fxLayout="row wrap"
+          fxLayout.lt-sm="column wrap"
+          ngClass.lt-sm="small"
+          class=""
+        >
+          <mat-form-field
+            fxFlex="0 0 50%"
+            class="mat-datepicker-field"
+            floatLabel="never"
+          >
+            <input
+              [matDatepicker]="dates"
+              formControlName="payDate"
+              [min]="min"
+              [max]="max"
+              matInput
+              id="paydateInput"
+              aria-labelledby="paydateLabel"
+              width="100%"
+              aria-required="true"
+            />
+            <mat-datepicker-toggle
+              [for]="dates"
+              matSuffix
+            ></mat-datepicker-toggle>
+            <mat-datepicker touchUi="true" #dates [startAt]="startDate">
+            </mat-datepicker>
+          </mat-form-field>
+        </div>
+      </fieldset>
+      <div role="alert" aria-atomic="true" aria-relevant="additions removals">
+        <mat-error
+          *ngIf="
+            (!incomeEditForm.get('payDate').valid &&
+              incomeEditForm.get('payDate').touched) ||
+            showErrors
+          "
+          [ngClass.lt-sm]="'small'"
+        >
+          <span
+            *ngIf="
+              incomeEditForm.get('payDate').hasError('required') &&
+              !incomeEditForm.get('payDate').hasError('matDatepickerParse')
+            "
+            >{{ 'reports.income.edit.date.error.required' | translate }}
+          </span>
+          <span
+            *ngIf="incomeEditForm.get('payDate').hasError('matDatepickerParse')"
+            >{{ 'reports.income.edit.date.error.pattern' | translate }}
+          </span>
+          <span
+            *ngIf="incomeEditForm.get('payDate').hasError('matDatepickerMin')"
+            >{{ 'reports.income.edit.date.error.matDatepickerMin' | translate }}
+          </span>
+          <span
+            *ngIf="incomeEditForm.get('payDate').hasError('matDatepickerMax')"
+            >{{ 'reports.income.edit.date.error.matDatepickerMax' | translate }}
+          </span>
+        </mat-error>
+      </div>
+    </div>
+
+    <div class="form-control-container">
+      <fieldset class="mat-form-controls">
+        <legend class="mat-form-label">
+          <span id="grossAmountlabel">{{
+            'reports.income.edit.grossAmount.label' | translate
+          }}</span>
+          <button
+            role="button"
+            (click)="showTooltip('reports.income.edit.grossAmount.tooltip')"
+            id="grossAmountToolTipButton"
+            aria-label="tooltip"
+            class="mat-form-tooltip"
+            type="button"
+          >
+            &nbsp;<i class="fa font-size-40 fa-question-circle"></i>
+          </button>
+        </legend>
+        <div
+          fxLayout="row wrap"
+          fxLayout.lt-sm="column wrap"
+          ngClass.lt-sm="small"
+        >
+          <mat-form-field
+            fxFlex="0 0 50%"
+            floatLabel="never"
+            class="mat-has-prefix"
+          >
+            <span matPrefix>$&nbsp;</span>
+            <input
+              matInput
+              id="grossAmountInput"
+              formControlName="grossAmount"
+              aria-labelledby="grossAmountlabel"
+              maxlength="9"
+              type="text"
+              aria-required="true"
+            />
+          </mat-form-field>
+        </div>
+      </fieldset>
+      <div role="alert" aria-atomic="true" aria-relevant="additions removals">
+        <mat-error
+          *ngIf="
+            (!incomeEditForm.get('grossAmount').valid &&
+              incomeEditForm.get('grossAmount').touched) ||
+            showErrors
+          "
+          [ngClass.lt-sm]="'small'"
+        >
+          <span
+            *ngIf="incomeEditForm.get('grossAmount').hasError('required')"
+            >{{
+              'reports.income.edit.grossAmount.error.required' | translate
+            }}</span
+          >
+          <span *ngIf="incomeEditForm.get('grossAmount').hasError('pattern')">{{
+            'reports.income.edit.grossAmount.error.pattern' | translate
+          }}</span>
+          <span *ngIf="incomeEditForm.get('grossAmount').hasError('min')"
+            >{{ 'reports.income.edit.grossAmount.error.min' | translate }}
+          </span>
+        </mat-error>
+      </div>
+    </div>
+
+    <div class="form-control-container">
+      <fieldset class="mat-form-controls">
+        <legend class="mat-form-label">
+          <span id="netAmountLabel">{{
+            'reports.income.edit.netAmount.label' | translate
+          }}</span>
+          <button
+            role="button"
+            (click)="showTooltip('reports.income.edit.netAmount.tooltip')"
+            id="netAmountToolTipButton"
+            aria-label="tooltip"
+            class="mat-form-tooltip"
+            type="button"
+          >
+            &nbsp;<i class="fa font-size-40 fa-question-circle"></i>
+          </button>
+        </legend>
+        <div
+          fxLayout="row wrap"
+          fxLayout.lt-sm="column wrap"
+          ngClass.lt-sm="small"
+        >
+          <mat-form-field
+            fxFlex="0 0 50%"
+            floatLabel="never"
+            class="mat-has-prefix"
+          >
+            <span matPrefix>$&nbsp;</span>
+            <input
+              matInput
+              id="netAmountInput"
+              formControlName="netAmount"
+              aria-labelledby="netAmountLabel"
+              maxlength="9"
+              type="text"
+              aria-required="true"
+            />
+          </mat-form-field>
+        </div>
+      </fieldset>
+      <div role="alert" aria-atomic="true" aria-relevant="additions removals">
+        <mat-error
+          *ngIf="
+            (!incomeEditForm.get('netAmount').valid &&
+              incomeEditForm.get('netAmount').touched) ||
+            showErrors
+          "
+          [ngClass.lt-sm]="'small'"
+        >
+          <span *ngIf="incomeEditForm.get('netAmount').hasError('required')">{{
+            'reports.income.edit.netAmount.error.required' | translate
+          }}</span>
+          <span *ngIf="incomeEditForm.get('netAmount').hasError('pattern')">{{
+            'reports.income.edit.netAmount.error.pattern' | translate
+          }}</span>
+          <span *ngIf="incomeEditForm.get('netAmount').hasError('min')"
+            >{{ 'reports.income.edit.netAmount.error.min' | translate }}
+          </span>
+        </mat-error>
+      </div>
+    </div>
+
+    <div class="form-control-container">
+      <fieldset class="mat-form-controls">
+        <legend class="mat-form-label">
+          <span id="childSupportAmountLabel">{{
+            'reports.income.edit.childSupportAmount.label' | translate
+          }}</span>
+          <button
+            role="button"
+            (click)="
+              showTooltip('reports.income.edit.childSupportAmount.tooltip')
+            "
+            id="childSupportAmountToolTipButton"
+            aria-label="tooltip"
+            class="mat-form-tooltip"
+            type="button"
+          >
+            &nbsp;<i class="fa font-size-40 fa-question-circle"></i>
+          </button>
+        </legend>
+        <div
+          fxLayout="row wrap"
+          fxLayout.lt-sm="column wrap"
+          ngClass.lt-sm="small"
+        >
+          <mat-radio-group
+            name="childSupportRadio"
+            id="childSupportRadio"
+            formControlName="childSupportRadio"
+          >
+            <mat-radio-button
+              aria-label="Yes"
+              value="Yes"
+              color="primary"
+              id="childSupportRadioYes"
+            >
+              {{
+                'reports.income.edit.childSupportAmount.options.true'
+                  | translate
+              }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </mat-radio-button>
+            <mat-radio-button
+              aria-label="No"
+              value="No"
+              color="primary"
+              aria-checked="true"
+              (change)="childSupportChange($event)"
+              id="childSupportRadioNo"
+            >
+              {{
+                'reports.income.edit.childSupportAmount.options.false'
+                  | translate
+              }}
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+        <div
+          fxLayout="row wrap"
+          fxLayout.lt-sm="column wrap"
+          ngClass.lt-sm="small"
+        >
+          <mat-form-field
+            fxFlex="0 0 50%"
+            floatLabel="never"
+            class="mat-has-prefix"
+            *ngIf="incomeEditForm.value.childSupportRadio == 'Yes'"
+          >
+            <span matPrefix>$&nbsp;</span>
+            <input
+              matInput
+              id="childSupportAmountInput"
+              aria-required="true"
+              formControlName="childSupportAmount"
+              aria-label="Child Support Amount"
+              maxlength="9"
+              type="text"
+              aria-required="true"
+            />
+          </mat-form-field>
+        </div>
+      </fieldset>
+      <div role="alert" aria-atomic="true" aria-relevant="additions removals">
+        <mat-error
+          *ngIf="
+            (!incomeEditForm.get('childSupportAmount').valid &&
+              incomeEditForm.get('childSupportAmount').touched) ||
+            showErrors
+          "
+          [ngClass.lt-sm]="'small'"
+        >
+          <span
+            *ngIf="
+              incomeEditForm.get('childSupportAmount').hasError('required')
+            "
+            >{{
+              'reports.income.edit.childSupportAmount.error.required'
+                | translate
+            }}</span
+          >
+          <span
+            *ngIf="incomeEditForm.get('childSupportAmount').hasError('pattern')"
+            >{{
+              'reports.income.edit.childSupportAmount.error.pattern' | translate
+            }}</span
+          >
+          <span
+            *ngIf="incomeEditForm.get('childSupportAmount').hasError('min')"
+            >{{
+              'reports.income.edit.childSupportAmount.error.min' | translate
+            }}</span
+          >
+        </mat-error>
+      </div>
+    </div>
+
+    <div class="form-control-container">
+      <fieldset class="mat-form-controls">
+        <legend class="mat-form-label">
+          <span id="garnishmentAmountLabel">{{
+            'reports.income.edit.garnishmentAmount.label' | translate
+          }}</span>
+          <button
+            role="button"
+            (click)="
+              showTooltip('reports.income.edit.garnishmentAmount.tooltip')
+            "
+            id="garnishmentAmountToolTipButton"
+            aria-label="tooltip"
+            class="mat-form-tooltip"
+            type="button"
+          >
+            &nbsp;<i class="fa font-size-40 fa-question-circle"></i>
+          </button>
+        </legend>
+        <div
+          fxLayout="row wrap"
+          fxLayout.lt-sm="column wrap"
+          ngClass.lt-sm="small"
+        >
+          <mat-radio-group
+            id="garnishmentRadio"
+            formControlName="garnishmentRadio"
+          >
+            <mat-radio-button
+              aria-label="Yes"
+              value="Yes"
+              color="primary"
+              id="garnishmentRadioYes"
+            >
+              {{
+                'reports.income.edit.garnishmentAmount.options.true'
+                  | translate
+              }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </mat-radio-button>
+            <mat-radio-button
+              aria-label="No"
+              value="No"
+              color="primary"
+              aria-checked="true"
+              (change)="garnishmentChange($event)"
+              id="garnishmentRadioNo"
+            >
+              {{
+                'reports.income.edit.garnishmentAmount.options.false'
+                  | translate
+              }}
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+        <div
+          fxLayout="row wrap"
+          fxLayout.lt-sm="column wrap"
+          ngClass.lt-sm="small"
+        >
+          <mat-form-field
+            fxFlex="0 0 50%"
+            floatLabel="never"
+            class="mat-has-prefix"
+            *ngIf="incomeEditForm.value.garnishmentRadio == 'Yes'"
+          >
+            <span matPrefix>$&nbsp;</span>
+            <input
+              matInput
+              id="garnishmentAmountInput"
+              aria-required="true"
+              formControlName="garnishmentAmount"
+              aria-labelledby="Garnishment Amount"
+              maxlength="9"
+              type="text"
+            />
+          </mat-form-field>
+        </div>
+      </fieldset>
+      <div role="alert" aria-atomic="true" aria-relevant="additions removals">
+        <mat-error
+          *ngIf="
+            (!incomeEditForm.get('garnishmentAmount').valid &&
+              incomeEditForm.get('garnishmentAmount').touched) ||
+            showErrors
+          "
+          [ngClass.lt-sm]="'small'"
+        >
+          <span
+            *ngIf="incomeEditForm.get('garnishmentAmount').hasError('required')"
+            >{{
+              'reports.income.edit.garnishmentAmount.error.required' | translate
+            }}</span
+          >
+          <span
+            *ngIf="incomeEditForm.get('garnishmentAmount').hasError('pattern')"
+            >{{
+              'reports.income.edit.garnishmentAmount.error.pattern' | translate
+            }}</span
+          >
+          <span
+            *ngIf="incomeEditForm.get('garnishmentAmount').hasError('min')"
+            >{{
+              'reports.income.edit.garnishmentAmount.error.min' | translate
+            }}</span
+          >
+        </mat-error>
+      </div>
+    </div>
+
+    <div class="form-control-container" *ngIf="showFileUpload">
+      <fieldset class="mat-form-controls">
+        <legend class="mat-form-label">
+          <span
+            id="fileUploadlabel1"
+            [innerHTML]="'reports.income.edit.file.label1' | translate"
+          ></span>
+          <button
+            role="button"
+            (click)="showTooltip('reports.income.edit.file.tooltip')"
+            id="fileToolTipButton"
+            aria-label="tooltip"
+            class="mat-form-tooltip"
+            type="button"
+          >
+            &nbsp;<i class="fa font-size-40 fa-question-circle"></i>
+          </button>
+          <span
+            id="fileUploadlabel2"
+            [innerHTML]="'reports.income.edit.file.label2' | translate"
+          ></span>
+        </legend>
+        <div
+          fxLayout="row wrap"
+          fxLayout.lt-sm="column wrap"
+          ngClass.lt-sm="small"
+        >
+          <div fxFlex="0 0 50%" class="filedialogContainer">
+            <input
+              id="files"
+              #fileInput
+              formControlName="file"
+              type="file"
+              (change)="fileChange($event)"
+              placeholder="Upload file"
+              style="opacity: 0;
+              height: 0;
+              width: 0;
+              min-height: 0;
+              line-height: 0;
+              margin: 0;
+              padding: 0;
+              border: 0 none;"
+              (click)="fileInput.value = null"
+              value=""
+              accept=".pdf,.jpg,.jpeg,.png"
+            />
+            <label
+              for="files"
+              #fileName
+              class="fileUpload fileUploadLabel"
+              title="{{
+                'reports.income.edit.file.paperclipIconLabel' | translate
+              }}"
+              >&nbsp;</label
+            >
+            <button
+              *ngIf="file"
+              type="button"
+              class="btn btn-danger"
+              (click)="previewFile($event)"
+              title="{{
+                'reports.income.edit.file.deleteIconLabel' | translate
+              }}"
+            >
+              <span
+                >&nbsp;<i
+                  class="fa font-size-80 fa-search"
+                  style="font-size: x-large;"
+                ></i
+              ></span>
+            </button>
+            <button
+              *ngIf="file"
+              type="button"
+              class="btn btn-danger"
+              (click)="clearFile()"
+              title="{{
+                'reports.income.edit.file.deleteIconLabel' | translate
+              }}"
+            >
+              <span
+                >&nbsp;<i
+                  class="fa font-size-80 fa-trash"
+                  style="font-size: x-large;"
+                ></i
+              ></span>
+            </button>
+          </div>
+        </div>
+      </fieldset>
+      <div role="alert" aria-atomic="true" aria-relevant="additions removals">
+        <mat-error *ngIf="file" [ngClass.lt-sm]="'small'">
+          <span *ngIf="checkFileType()">{{
+            'reports.income.edit.file.error.wrongType' | translate
+          }}</span>
+          <span *ngIf="checkFileSize()">{{
+            'reports.income.edit.file.error.wrongSize' | translate
+          }}</span>
+          <span *ngIf="checkFileNamePattern()">{{
+            'reports.income.edit.file.error.wrongFileNamePattern' | translate
+          }}</span>
+          <span *ngIf="checkFileNameSize()">{{
+            'reports.income.edit.file.error.wrongFileNameSize' | translate
+          }}</span>
+        </mat-error>
+      </div>
+    </div>
+    <div role="alert" aria-atomic="false" aria-relevant="all">
+      <mat-error> <span *ngIf="showErrors"></span> </mat-error>
+    </div>
+    <button
+      role="button"
+      id="incomeEditFormSubmitButton"
+      mat-raised-button
+      color="primary"
+      type="submit"
+      aria-label="Continue"
+    >
+      {{ 'reports.income.edit.submit' | translate }}
+    </button>
+    <button
+      role="button"
+      id="incomeEditFormCancelButton"
+      mat-raised-button
+      aria-label="Cancel"
+      (click)="onCancel()"
+      color="accent"
+    >
+      {{ 'reports.income.edit.cancel' | translate }}
+    </button>
+  </form>
+</section>
